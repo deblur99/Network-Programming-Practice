@@ -2,13 +2,10 @@
 #include "defines.h"
 #include "linked_list.h"
 
-int checkExistedAccount(char id[]);
-
-int checkPasswordIsCorrect(char password[]);
-
-void signupNewAccount(char id[], char password[]);
-
 int main(int argc, char *argv[]) {
+    HEAD *linkedList = createLinkedList();
+    initLinkedList(linkedList);
+
     struct sockaddr_in sock_addr;       // 서버 소켓 생성을 위해 필요한 정보를 포함하는 구조체
     socklen_t sock_len = sizeof(sock_addr);
 
@@ -59,20 +56,21 @@ int main(int argc, char *argv[]) {
     }
 
     for (;;) {
-        // read(), write()
-        // read() : get data from opposite side which calls write() function
-        // write() : send data to opposite side which calls read() function
+        int isSignup = 0;   // flag
+        Account newAccount;
+
+        // step 1) get ID from client
         if ((rbyte = read(connect_sockfd, buf, BUF_SIZE)) < 0) {            
             printf("Failed to read data\n");
             break;
         }
+        strcpy(newAccount.id, buf);
         
         // handle buffer overflow
         if (rbyte > BUF_SIZE) {
             printf("Exceeded BUF_SIZE\n");
             break;
         }
-
         // handle escape condition
         if (strcmp(buf, "exit") == 0) {
             printf("bye\n");
@@ -81,40 +79,64 @@ int main(int argc, char *argv[]) {
             free(buf);
             return 0;
         }
+        printf("Received id : %s\n", buf);
 
-        printf("Received data : %s\n", buf);
+        // id 등록여부 확인
+        if (strcmp(buf, searchAccountByID(linkedList, buf).id) == 0) {
+            memset(buf, 0, BUF_SIZE);
+            strcpy(buf, "signin");
+        } else {
+            memset(buf, 0, BUF_SIZE);
+            strcpy(buf, "signup");
+            isSignup = 1;
+        }
+
+        if ((wbyte = write(connect_sockfd, buf, BUF_SIZE)) < 0) {
+            printf("Failed to write data\n");
+            break;
+        }
+        printf("Sent branch : %s\n", buf);
+
+
+        // step 2) get password from client
+        if ((rbyte = read(connect_sockfd, buf, BUF_SIZE)) < 0) {            
+            printf("Failed to read data\n");
+            break;
+        }
+        printf("Received password : %s\n", buf);
+
+        if (isSignup) {
+            strcpy(newAccount.password, buf);
+            insertLastNode(linkedList, newAccount);
+            printf("Account created: ID - %s, PW - %s\n", newAccount.id, newAccount.password);
+
+            memset(buf, 0, BUF_SIZE);
+            strcpy(buf, "signup");
+            
+        } else {
+            Account compare = searchAccountByID(linkedList, newAccount.id);
+            if (strcmp(compare.password, buf) == 0) {
+                printf("Account logged in: ID - %s, PW - %s\n", compare.id, compare.password);
+                memset(buf, 0, BUF_SIZE);
+                strcpy(buf, "login_success");
+
+            } else {
+                printf("Account failed to log in: ID - %s\n", compare.id);
+                memset(buf, 0, BUF_SIZE);
+                strcpy(buf, "login_failure");
+            }
+        }
 
         // read()에서 입력받은 문자열을 그대로 클라이언트에 전송
         if ((wbyte = write(connect_sockfd, buf, BUF_SIZE)) < 0) {
             printf("Failed to write data\n");
             break;
         }
-        printf("Sent data : %s\n", buf);
+        printf("Sent result : %s\n", buf);
     }
     
     close(connect_sockfd);
     close(listen_sockfd);
     free(buf);
     return 1;
-}
-
-int checkExistedAccount(char id[]) {
-    // TO DO : implementation this
-    // while (!(strncmp(id, "", 1) == 0)) {
-    //     for (int i = 0; i < strlen(id); i++) {
-    //         if (id[i] != )
-    //     }
-    // }
-    
-    return 0;
-}
-
-int checkPasswordIsCorrect(char password[]) {
-
-    return 0;
-
-}
-
-void signupNewAccount(char id[], char password[]) {
-
 }

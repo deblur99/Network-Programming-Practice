@@ -41,3 +41,5 @@ void freeLinkedList(HEAD *head);
 Account createAccount(char id[], char password[]);
 
 void testLinkedList();
+
+void initLinkedList(HEAD *head);

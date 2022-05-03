@@ -156,3 +156,9 @@ void testLinkedList() {
 
     freeLinkedList(head);
 }
+
+void initLinkedList(HEAD *head) {
+    insertFirstNode(head, createAccount("deblur99", "1Q2W3E4R!"));
+    insertLastNode(head, createAccount("amybgyhouse", "19871023"));
+    insertLastNode(head, createAccount("mynameeee", "1q2w3e4r!"));
+}
