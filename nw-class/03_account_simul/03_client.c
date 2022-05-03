@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
             printf("Enter the password to sign up : ");
         }
 
-        
+
         // step 2) get user password
         scanf("%s", buf);
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
             printf("Failed to read data\n");
             break;
         }
-        printf("Received result : %s\n", buf);
+        printf("Received result : %s\n\n", buf);
     }
 
     close(connect_sockfd);

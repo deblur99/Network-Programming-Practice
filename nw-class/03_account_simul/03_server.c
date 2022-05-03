@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
             printf("Failed to write data\n");
             break;
         }
-        printf("Sent result : %s\n", buf);
+        printf("Sent result : %s\n\n", buf);
     }
     
     close(connect_sockfd);
