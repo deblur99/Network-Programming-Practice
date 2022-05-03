@@ -1,14 +1,5 @@
 // 1:1 client-server socket program.
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-
-#define BUF_SIZE            10000
-#define PORT                4000
-#define IP                  "127.0.0.1"
+#include "defines.h"
 
 int main(int argc, char *argv[]) {
     struct sockaddr_in sock_addr;       // 연결할 서버의 정보를 포함하는 구조체
@@ -39,6 +30,8 @@ int main(int argc, char *argv[]) {
     }
 
     for (;;) {
+        // step 1) get user ID
+        printf("Enter user ID to sign in: ");
         scanf("%[^\n]s", buf);
 
         // read(), write()
@@ -49,20 +42,54 @@ int main(int argc, char *argv[]) {
             close(connect_sockfd);
             free(buf);
             return -1;        
-        }
+        } 
 
-        // handle escape condition
-        if (strcmp(buf, "exit") == 0) {
-            printf("bye\n");
-            break;
-        }
-        printf("Sent data : %s\n", buf);
+        // // handle escape condition
+        // if (strcmp(buf, "exit") == 0) {
+        //     printf("bye\n");
+        //     break;
+        // }
+        printf("Sent data : %s\n", buf); // send and wait
 
-        if ((wbyte = read(connect_sockfd, buf, BUF_SIZE)) < 0) {
+        if ((rbyte = read(connect_sockfd, buf, BUF_SIZE)) < 0) {
             printf("Failed to read data\n");
             break;
         }
-        printf("Received data : %s\n", buf);
+        
+        // branch: whether id exists on server or not
+        // if it exists, server acquires user password
+        // it it does not, server acquires user password as well to sign up
+        if (strcmp(buf, "signin") != 0 && strcmp(buf, "signup") != 0) {
+            break;
+        }
+        
+        scanf("\n");
+
+        if (strcmp(buf, "signin") == 0) {
+            printf("Enter the password to sign in : ");
+        }
+
+        else if (strcmp(buf, "signup") == 0) {
+            printf("Enter the password to sign up : ");
+        }
+
+        // enter password
+        scanf("%s", buf);
+
+        if ((wbyte = write(connect_sockfd, buf, BUF_SIZE)) < 0) {
+            printf("Failed to write data\n");
+            close(connect_sockfd);
+            free(buf);
+            return -1;        
+        }
+
+        if ((rbyte = read(connect_sockfd, buf, BUF_SIZE)) < 0) {
+            printf("Failed to read data\n");
+            break;
+        }
+
+        printf("%s\n", buf);
+        
 
         // scanf 함수로 stdin 버퍼에 공백 문자를 입력함으로써,
         // stdin 버퍼를 비워 다음 반복에서 공백 포함하여 scanf 함수로 입력할 수 있게 한다.
