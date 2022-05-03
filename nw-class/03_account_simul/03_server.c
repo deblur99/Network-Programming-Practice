@@ -6,17 +6,163 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define BUF_SIZE    10000
-#define PORT        4000
+#define BUF_SIZE            10000
+#define PORT                4000
 
 #define MAX_ACCOUNTS        50
 
+#define ID_LENGTH           20
+#define PW_LENGTH           40
+
+// 연결리스트로 구현해보자!
 typedef struct _Account {
-    char id[20];
-    char password[40];
+    char id[ID_LENGTH];
+    char password[PW_LENGTH];
 }Account;
 
-void initDB();
+typedef struct _NODE {
+    Account account;
+    struct _NODE *link;
+}NODE;
+
+typedef struct _HEAD {
+    NODE *link;
+}HEAD;
+
+HEAD* createLinkedList() {
+    HEAD *head = (HEAD *)malloc(sizeof(HEAD));
+    return head;
+}
+
+int getSize(HEAD *head) {
+    int size = 0;
+    NODE *temp = head->link;
+
+    while (temp != NULL) {
+        temp = temp->link;
+        size++;
+    }
+
+    return size;
+}
+
+void insertFirstNode(HEAD *head, Account account) {
+    NODE *newNode = (NODE *)malloc(sizeof(NODE));
+    strcpy(newNode->account.id, account.id);
+    strcpy(newNode->account.password, account.password);
+    newNode->link = head->link;
+    head->link = newNode;
+}
+
+void insertMiddleNode(HEAD *head, int idx, Account account) {
+    // check input index is out of range
+    if (idx >= getSize(head)) {
+        printf("Error : index out of range\n");
+        return;
+    }
+
+    NODE *temp = head->link;
+    for (int i = 0; i < idx - 1; i++) {
+        temp = temp->link;
+    }
+
+    NODE *newNode = (NODE *)malloc(sizeof(NODE));
+    strcpy(newNode->account.id, account.id);
+    strcpy(newNode->account.password, account.password);
+    newNode->link = temp->link;
+    temp->link = newNode;    
+}
+
+void insertLastNode(HEAD *head, Account account) {
+    NODE *temp = head->link;
+
+    if (getSize(head) <= 1) {
+        return insertFirstNode(head, account);
+    }
+
+    while (temp->link != NULL) {
+        temp = temp->link;
+    }
+
+    NODE *newNode = (NODE *)malloc(sizeof(NODE));
+    strcpy(newNode->account.id, account.id);
+    strcpy(newNode->account.password, account.password);
+    newNode->link = NULL;
+    temp->link = newNode;
+}
+
+void deleteLinkedList(HEAD *head, int idx) {
+    // check input index is out of range
+    if (idx >= getSize(head)) {
+        printf("Error : index out of range\n");
+        return;
+    }
+
+    NODE *temp = head->link;
+    NODE *pre;
+
+    for (int i = 0; i < idx; i++) {
+        pre = temp;
+        temp = temp->link;
+    }
+
+    pre->link = temp->link;
+    temp->link = NULL;
+
+    free(temp);
+}
+
+void printLinkedList(HEAD *head) {
+    NODE *temp = head->link;
+
+    while (temp != NULL) {
+        printf("ID : %s, Password : %s\n", temp->account.id, temp->account.password);
+        temp = temp->link;
+    }
+}
+
+void freeLinkedList(HEAD *head) {
+    NODE *temp = head->link;
+    NODE *pre = temp;
+    
+    while (temp != NULL) {
+        temp = temp->link;
+        free(pre);
+        pre = temp;
+    }
+
+    free(head);
+}
+
+Account createAccount(char id[], char password[]) {
+    Account account = {"", ""};
+
+    if (strlen(id) > ID_LENGTH || strlen(password) > PW_LENGTH) {
+        return account;
+    }
+
+    strcpy(account.id, id);
+    strcpy(account.password, password);
+    
+    return account;
+}
+
+// debug
+void testLinkedList() {
+    HEAD *head = createLinkedList();
+    insertFirstNode(head, createAccount("deblur99", "1Q2W3E4R!"));
+    insertMiddleNode(head, 2, createAccount("mynameeee", "1q2w3e4r!"));
+    insertMiddleNode(head, 3, createAccount("mynameeee", "1q2w3e4r!"));
+    insertMiddleNode(head, 1, createAccount("mynameeee", "1q2w3e4r!"));
+    insertMiddleNode(head, 0, createAccount("mynameeee", "1q2w3e4r!"));
+    insertLastNode(head, createAccount("amybgyhouse", "password"));
+    insertLastNode(head, createAccount("socketpgm", "assnmnt2323"));
+    insertFirstNode(head, createAccount("dankook", "univ!"));
+    
+    printLinkedList(head);
+
+    freeLinkedList(head);
+}
 
 int checkExistedAccount(char id[]);
 
@@ -24,21 +170,11 @@ int checkPasswordIsCorrect(char password[]);
 
 void signupNewAccount(char id[], char password[]);
 
-// database
-static Account DB[MAX_ACCOUNTS] = { {"", ""}, };
-
-void initDB() {
-    strcpy(DB[0].id, "deblur99");
-    strcpy(DB[0].password, "1Q2W3E4R!");
-
-    strcpy(DB[1].id, "myidee12");
-    strcpy(DB[1].password, "password12!");
-
-    strcpy(DB[2].id, "amybgyhouse");
-    strcpy(DB[2].password, "hellogy!");
-}
-
 int main(int argc, char *argv[]) {
+    testLinkedList(); // debug
+    return 0;
+
+
     struct sockaddr_in sock_addr;       // 서버 소켓 생성을 위해 필요한 정보를 포함하는 구조체
     socklen_t sock_len = sizeof(sock_addr);
 
@@ -130,14 +266,18 @@ int main(int argc, char *argv[]) {
 
 int checkExistedAccount(char id[]) {
     // TO DO : implementation this
-    while (!(strncmp(id, "", 1) == 0)) {
-        for (int i = 0; i < strlen(id); i++) {
-            if (id[i] != )
-        }
-    }
+    // while (!(strncmp(id, "", 1) == 0)) {
+    //     for (int i = 0; i < strlen(id); i++) {
+    //         if (id[i] != )
+    //     }
+    // }
+    
+    return 0;
 }
 
 int checkPasswordIsCorrect(char password[]) {
+
+    return 0;
 
 }
 
