@@ -63,7 +63,9 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(buf, "signup") == 0) {
             printf("Enter the password to sign up : ");
         }
-        // enter password
+
+        
+        // step 2) get user password
         scanf("%s", buf);
 
         if ((wbyte = write(connect_sockfd, buf, BUF_SIZE)) < 0) {
