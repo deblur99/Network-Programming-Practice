@@ -6,9 +6,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define BUF_SIZE    10000
-#define PORT        4000
-#define IP          "127.0.0.1"
+#define BUF_SIZE            10000
+#define PORT                4000
+#define IP                  "127.0.0.1"
 
 int main(int argc, char *argv[]) {
     struct sockaddr_in sock_addr;       // 연결할 서버의 정보를 포함하는 구조체
